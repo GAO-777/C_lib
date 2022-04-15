@@ -151,7 +151,7 @@ Console::Console(QWidget *parent) :
 
 void Console::commandHandler(QString commandStr)
 {
-    QQStringList commandArray = commandStr.split(" ");
+    QStringList commandArray = commandStr.split(" ");
 
     if(commandArray[0] == "clear") clear();
 
