@@ -41,6 +41,7 @@ QList<unsigned int> WordToQList(WORD* InData, int size);
 void printSendData(QString str,QList<unsigned int>* Addr,QList<unsigned int>* Data);
 QList<unsigned int> WordToQList(WORD* InData, int size);
 bool CLToQList(QString openFileName, QList<unsigned int> *Addr, QList<unsigned int> *Data);
+QList<unsigned int>* EthDatagramToList(QByteArray* datagram);
 
 enum ConnectionType{
     NONE        = 0,
@@ -85,6 +86,7 @@ public:
     explicit Console(QWidget *parent = nullptr);
     void commandHandler(QString commandStr);   // обработчик команд
     void print(QString s, QString type);
+	void printTable(QList<unsigned int> * Data);
     void output(QString, QString type);
     void scrollDown();
     void insertPrompt(bool insertNewBlock = true);

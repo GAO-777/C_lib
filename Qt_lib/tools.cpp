@@ -103,7 +103,17 @@ bool CLToQList(QString openFileName,QList<unsigned int> *Addr, QList<unsigned in
     }
 }
 
+QList<unsigned int>* EthDatagramToList(QByteArray *datagram)
+{
+    datagram->toHex();
+    QList<unsigned int> *Data = new QList<unsigned int> ();
 
+    for(int i =0;i<datagram->size();i=i+2){
+       Data->append(((datagram->at(i+1)<<8) & 0xFF00) |  (datagram->at(i+0) & 0x00FF));
+
+        }
+       return Data;
+}
 /*===============================================================================================*\
   ███████████████████████████████████████████████████████████████████████████████████████████████
   ██████████████████████████████────█────█─██─█───█────█─███───██████████████████████████████████
@@ -121,10 +131,14 @@ Console::Console(QWidget *parent) :
 {
     QSizePolicy policy;
     policy.setHorizontalPolicy(QSizePolicy::Preferred);
-
+	policy.setVerticalPolicy(QSizePolicy::Expanding);
+    this->setWordWrapMode(QTextOption::NoWrap);
+	this->setMinimumWidth(370);
+    this->setMaximumWidth(370);												 							   
     setMinimumHeight(100);
     setSizePolicy(policy);
 
+	this->setFont(QFont("Courier New"));									
 
     QPalette p = palette();
     setPalette(p);
@@ -137,11 +151,25 @@ Console::Console(QWidget *parent) :
 
 void Console::commandHandler(QString commandStr)
 {
-    QStringList commandArray = commandStr.split(" ");
+    QQStringList commandArray = commandStr.split(" ");
 
-    if(commandArray[0] == "do"){
-        qDebug()<<"sdfs";
+    if(commandArray[0] == "clear") clear();
+
+}
+
+void Console::printTable(QList<unsigned int> *Data)
+{
+    textCursor().insertText("\n");
+    textCursor().insertText("+-----+-----+-----+-----+-----+-----+-----+-----+");
+    for (int i=0;i<Data->size();i++){
+        if(i%8==0){
+            this->textCursor().insertText("\n|");
+            this->textCursor().insertText(QString("%1|").arg(Data->at(i),5));
+        }else{
+            this->textCursor().insertText(QString("%1|").arg(Data->at(i),5));
+        }
     }
+    textCursor().insertText("\n+-----+-----+-----+-----+-----+-----+-----+-----+\n");	 
 }
 
 void Console::print(QString s, QString type)
