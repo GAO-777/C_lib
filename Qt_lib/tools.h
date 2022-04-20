@@ -62,6 +62,7 @@ struct Connection_Info {
     int Port;
     // - - - SlowLink - - - //
     int NumOfDownLink;  // Номер используемого DownLink'a
+    bool EndToEndAddr;  // сквозная адресация (версия Юдина)
 };
 
 
@@ -238,9 +239,10 @@ public:
 /*==========================================================================================*\
 - - - - - - - - - - - - - SlowLink PAGE - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*==========================================================================================*/
-    QLabel* Num_DL_label;
-    QWidget*    SlowLink_page;
+    QLabel*     Num_DL_label;
     QSpinBox*   NumOfDownLink_sp;      // Номер Down_Link'a, к которому подлючено устройство
+    QLabel*     EndtoEndAddr_label;
+    QCheckBox*  EndtoEndAddr_cb;
 
 
 private slots:

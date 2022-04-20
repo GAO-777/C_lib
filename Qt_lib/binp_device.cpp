@@ -88,7 +88,7 @@ int MCHS_Imitator::getStartAddrOfDownLink(int numOfDownLink)
     return DL_startAddr;
 }
 
-bool MCHS_Imitator::USBtoCLink_RedirRead(int numOfDownLink, unsigned int CL_Addr, QList<unsigned int> *Data)
+bool MCHS_Imitator::CLink_RedirRead(int numOfDownLink, unsigned int CL_Addr, QList<unsigned int> *Data)
 {
     if (numOfDownLink > 8) return false;
 
@@ -113,7 +113,7 @@ bool MCHS_Imitator::USBtoCLink_RedirRead(int numOfDownLink, unsigned int CL_Addr
     data[3] = 0;
     USB_Write_Data(USB_Device,addr,4,data);
 
-    qDebug()<<"\n"<<"USBtoCLink_RedirRead";
+    qDebug()<<"\n"<<"CLink_RedirRead";
     for(int i=0;i<4;i++){
         qDebug()<<addr[i]<<"<="<<data[i];
     }
@@ -176,9 +176,10 @@ bool MCHS_Imitator::CLink_RedirWrite(int numOfDownLink, unsigned int CL_Addr, QL
     delete[] data;
 }
 
-bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int> *Addr, QList<unsigned int> *Data)
+bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int> *Addr, QList<unsigned int> *Data, bool endToendAddr)
 {
     /*
+     * endToendAddr - если true, то 130 и 137 команды используют сквозную адресацию (версия Юдина)
        Данная команда осуществляет запись данных во внутренние ресурсы устройств, путем использования Командных Листов (КЛ).
        Запись будет инициироваться командой WR_CMD.
        Порядок действий:
@@ -195,18 +196,34 @@ bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int
     int rA = 0;
     bool wD = true;     // Нужно ли заполнять лист данных КЛ?
 
-    switch(opcode)
+    if(endToendAddr == false){
+        switch(opcode)
         {
-          case 193: rA=0;   wD=false; break;
-          case 210: rA=128; wD=false; break;
-          case 226: rA=256; wD=false; break;
-          case 241: rA=384; wD=false; break;
-          case 202: rA=64;  wD=true;  break;
-          case 217: rA=192; wD=true;  break;
-          case 233: rA=320; wD=true;  break;
-          case 250: rA=448; wD=true;  break;
-          default : return false;
+            case 193: rA=0;   wD=false; break;
+            case 210: rA=128; wD=false; break;
+            case 226: rA=256; wD=false; break;
+            case 241: rA=384; wD=false; break;
+            case 202: rA=64;  wD=true;  break;
+            case 217: rA=192; wD=true;  break;
+            case 233: rA=320; wD=true;  break;
+            case 250: rA=448; wD=true;  break;
+            default : return false;
         }
+    }else{
+        switch(opcode)
+        {
+            case 193: rA= 3072+0;   wD=false; break;
+            case 210: rA= 3072+128; wD=false; break;
+            case 226: rA= 3072+256; wD=false; break;
+            case 241: rA= 3072+384; wD=false; break;
+            case 202: rA= 3072+64;  wD=true;  break;
+            case 217: rA= 3072+192; wD=true;  break;
+            case 233: rA= 3072+320; wD=true;  break;
+            case 250: rA= 3072+448; wD=true;  break;
+            default : return false;
+        }
+
+    }
 
     // Проверка, что кол-во адресов равно кол-ву данных
     if (wD)
@@ -227,7 +244,7 @@ bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int
         if(i<Addr->size())
             Addr_local->append(Addr->at(i));
         else
-            Addr_local->append(0);
+            Addr_local->append(4096);
         if(i<Data->size())
             Data_local->append(Data->at(i));
         else
@@ -626,7 +643,7 @@ bool ADIS::setData_FL(MCHS_Imitator* MCHS_Imitator, int numOfDownLink, int data)
 
     }*/
 
-     MCHS_Imitator->CLink_TxRx(numOfDownLink,202,Addr,Data);
+     MCHS_Imitator->CLink_TxRx(numOfDownLink,202,Addr,Data,false);
 
 
      Addr1->append(9984);
@@ -634,7 +651,7 @@ bool ADIS::setData_FL(MCHS_Imitator* MCHS_Imitator, int numOfDownLink, int data)
      Addr1->append(12800);
      Data1->append(1);
 
-     MCHS_Imitator->CLink_TxRx(numOfDownLink,202,Addr1,Data1);
+     MCHS_Imitator->CLink_TxRx(numOfDownLink,202,Addr1,Data1,false);
 
 
 }

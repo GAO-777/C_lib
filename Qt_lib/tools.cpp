@@ -109,7 +109,7 @@ QList<unsigned int>* EthDatagramToList(QByteArray *datagram)
     QList<unsigned int> *Data = new QList<unsigned int> ();
 
     for(int i =0;i<datagram->size();i=i+2){
-       Data->append(((datagram->at(i+1)<<8) & 0xFF00) |  (datagram->at(i+0) & 0x00FF));
+       Data->append(((datagram->at(i+0)<<8) & 0xFF00) |  (datagram->at(i+1) & 0x00FF));
 
         }
        return Data;
@@ -827,14 +827,11 @@ ConnectionSetup::ConnectionSetup(QWidget *parent) :
 
     USB_page        = new QWidget(this);
     UDP_page        = new QWidget(this);
-    SlowLink_page   = new QWidget(this);
 
     ui->MVL_Pages->addWidget(USB_page);
     ui->MVL_Pages->addWidget(UDP_page);
-    ui->MVL_Pages->addWidget(SlowLink_page);
     USB_page->setVisible(false);
     UDP_page->setVisible(false);
-    SlowLink_page->setVisible(false);
 
     init_Pages();
 
@@ -909,6 +906,8 @@ void ConnectionSetup::UpdateSetup()
     else if(ui->SlowLink_ConnectionType_rb->isChecked()){
         ParentCB->ConnectionInfo.connectionType = SlowLink;
         ParentCB->ConnectionInfo.NumOfDownLink = NumOfDownLink_sp->value();
+        ParentCB->ConnectionInfo.EndToEndAddr  = EndtoEndAddr_cb->isCheckable();
+
         if(USB_SN_cb->currentIndex()>=0){
             ParentCB->ConnectionInfo.USB_SN = USB_DevInfo[USB_SN_cb->currentIndex()].SerialNumber;
         }
@@ -1008,11 +1007,17 @@ void ConnectionSetup::init_Pages()
 \*==========================================================================================*/
     NumOfDownLink_sp = new QSpinBox();
     Num_DL_label = new QLabel("Number Down Link :");
+    EndtoEndAddr_label = new QLabel("End-to-end addressing:");
+    EndtoEndAddr_cb = new QCheckBox();
 
     QHBoxLayout* SL_HL = new QHBoxLayout();
     SL_HL->addWidget(Num_DL_label,0,Qt::AlignLeft);
     SL_HL->addWidget(NumOfDownLink_sp,1,Qt::AlignLeft);
+    QHBoxLayout* EndAddr_HL = new QHBoxLayout();
+    EndAddr_HL->addWidget(EndtoEndAddr_label,0,Qt::AlignLeft);
+    EndAddr_HL->addWidget(EndtoEndAddr_cb,1,Qt::AlignLeft);
     MVL_USBpage->insertLayout(0,SL_HL,0);
+    MVL_USBpage->insertLayout(1,EndAddr_HL,0);
 }
 
 void ConnectionSetup::on_ApplyButton_clicked()
@@ -1219,9 +1224,9 @@ bool ConnectionManager::write(QList<unsigned int> *Addr, QList<unsigned int> *Da
     if(ConnectionInfo.connectionType == SlowLink){
         if(Addr->size() == Data->size()){
             bool status;
-            status = MCHS->CLink_TxRx(ConnectionInfo.NumOfDownLink,202,Addr,Data);
+            status = MCHS->CLink_TxRx(ConnectionInfo.NumOfDownLink,202,Addr,Data,ConnectionInfo.EndToEndAddr);
             if(!status){
-                Message = "Sending error! : "+QString::number(Eth_Device->LastError);
+                Message = "Sending error! : ";
                 return false;
             }
         }else{
@@ -1254,14 +1259,14 @@ bool ConnectionManager::read(QList<unsigned int> *Addr, QList<unsigned int> *Dat
 
     if(ConnectionInfo.connectionType == SlowLink){
         bool status;
-        status = MCHS->CLink_TxRx(ConnectionInfo.NumOfDownLink,193,Addr,new QList<unsigned int>);
+        status = MCHS->CLink_TxRx(ConnectionInfo.NumOfDownLink,193,Addr,new QList<unsigned int>,ConnectionInfo.EndToEndAddr);
         QList<unsigned int> *OutData = new QList<unsigned int>();
         MCHS->ReadDataFromDownLink(ConnectionInfo.NumOfDownLink,OutData);
         for(int i = 0;i<Addr->size();i++){
             Data->append(OutData->at(i));
         }
         if(!status){
-            Message = "Receive error! : "+QString::number(Eth_Device->LastError);
+            Message = "Receive error! : ";
             return false;
         }
     }
