@@ -48,7 +48,7 @@ bool CLToQList(QString openFileName,QList<unsigned int> *Addr, QList<unsigned in
         while(!file.atEnd())
             inputData << file.readLine();   // Отписываем все строки в массив
         file.close();
-/*==========================================================================================*\
+        /*==========================================================================================*\
 - - - - - - - - - - - - - Расшивровка - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*==========================================================================================*/
         // - - - пробегаем по массиву строк - - - //
@@ -57,20 +57,24 @@ bool CLToQList(QString openFileName,QList<unsigned int> *Addr, QList<unsigned in
             QString line = i->toStdString().c_str();
             line.remove("\n");
 
-            if(line.indexOf("-") >= 0) continue;
+            if(line.indexOf("--") >= 0) continue;
 
             // - - - Запись - - - - - - - - - - - - - - - - - - - - - - - - //
             if(line.indexOf("<=") > 0){
                 QStringList data = line.split("<=");
-
+                int numAddr = 0;
                 // - - - поиск адреса - - - - //
                 if(data[0].indexOf(":") > 0){
                     int startAdd = data[0].split(":")[0].toInt();
                     int endAdd = data[0].split(":")[1].toInt();
-                    for(int i=0;i<=endAdd-startAdd;i++)
+                    for(int i=0;i<=endAdd-startAdd;i++){
                         Addr->append(startAdd+i);
-                }else
+                        numAddr++;
+                    }
+                }else{
                     Addr->append(data[0].toInt());
+                    numAddr++;
+                }
 
                 // - - - поиск данных - - - - //
                 if(data[1].indexOf(":") > 0){
@@ -78,8 +82,10 @@ bool CLToQList(QString openFileName,QList<unsigned int> *Addr, QList<unsigned in
                     int endData = data[1].split(":")[1].toInt();
                     for(int i=0;i<=endData-startData;i++)
                         Data->append(startData+i);
-                }else
-                    Data->append(data[1].toInt());
+                }else{
+                    for(int i=0;i<numAddr;i++)
+                        Data->append(data[1].toInt());
+                }
             }
 
             // - - - Чтение - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -96,11 +102,11 @@ bool CLToQList(QString openFileName,QList<unsigned int> *Addr, QList<unsigned in
                     Addr->append(data[0].toInt());
 
             }
-
-
-
         }
+    }else{
+        return false;
     }
+    return true;
 }
 
 QList<unsigned int>* EthDatagramToList(QByteArray *datagram)

@@ -244,7 +244,7 @@ bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int
         if(i<Addr->size())
             Addr_local->append(Addr->at(i));
         else
-            Addr_local->append(4096);
+            Addr_local->append(0);
         if(i<Data->size())
             Data_local->append(Data->at(i));
         else

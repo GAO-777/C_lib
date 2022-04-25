@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 #include "../../C_lib/Interfaces/USB_Interface.h"
-#include "drv/ftd2xx.h"
+#include "../../C_lib/Interfaces/FTDI_Drv/ftd2xx.h"
 
 #include<QString>
 #include<QList>
