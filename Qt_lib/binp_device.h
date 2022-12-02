@@ -35,7 +35,7 @@ public:
     bool CLink_RedirRead(int numOfDownLink, unsigned int CL_Addr, QList<unsigned int> *Data);   // чтение 62-x слов КЛ
     bool CLink_RedirWrite(int numOfDownLink, unsigned int CL_Addr, QList<unsigned int>* Data);  // запись данных в КЛ (8 слов)
     bool CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int>* Addr, QList<unsigned int>* Data, bool endToendAddr);  // заполнение КЛ и отправка соответствующей команды
-    bool CLink_sendOpcode(int numOfDownLink,int opcode);
+    void CLink_sendOpcode(int numOfDownLink,int opcode);
     // - - - Функции, использующие 145 и 154 команды. Разработка Юдина Ю.В. - - - - - - - - - - - - - - - - - - - - - - - - - - //
     bool SendWrite4  (int numOfDownLink, int N, QList<unsigned int>* Addr, QList<unsigned int>* Data);  // запись данных (до 4 слов)
     bool SendWrite154(int numOfDownLink, int N, QList<unsigned int>* Addr, QList<unsigned int>* Data);  // запись любого кол-ва данных

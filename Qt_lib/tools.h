@@ -314,7 +314,6 @@ public:
     bool connectDevice();
     bool write(QList<unsigned int>* Addr,QList<unsigned int>* Data);
     bool read(QList<unsigned int>* Addr,QList<unsigned int>* Data);
-
 };
 
 

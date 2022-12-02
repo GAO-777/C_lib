@@ -73,6 +73,7 @@ bool USB_Interface::Open_Device()
         FT_SetLatencyTimer(FT_Handle,0x02);
         return true;
     }
+    return false;
 }
 
 /* TODO : Close_Device */
@@ -221,12 +222,20 @@ int USB_Read_Data(USB_Interface *USB, WORD *a, int size, unsigned int *Data)
     Addr   = a;
     RxData = new BYTE[16+size*4+8];
 
-// выбор типа сервиса (чтение)
+    // выбор типа сервиса (чтение)
     ServiceType = 0xABCD;
 
     TxBytes = USB_Send_Data_Protocol(USB, ServiceType, Addr, Addr, size);
     ::Sleep(10);
     RxBytes = USB_Recive_Data_Protocol(USB, RxData);
+
+    /*int size_test = 16+size*4+8;
+     unsigned int* Test_Data = new unsigned int[size_test];
+     for(i=0;i<size_test;i++){
+         printf("%d",(WORD)RxData[i]);
+         Test_Data[i] = (WORD)RxData[i];
+     }
+   // printf("\n");*/
 
     //Вывод данных
     if(RxBytes>0)
@@ -246,7 +255,7 @@ int USB_Write_Data(USB_Interface *USB, WORD *a, int size, WORD *Data)
     Addr   = a;
     RxData = new BYTE[16+size*4+8];
 
-// выбор типа сервиса (запись)
+    // выбор типа сервиса (запись)
     ServiceType = 0xCDAB;
 
     TxBytes = USB_Send_Data_Protocol(USB, ServiceType, Addr, Data, size);

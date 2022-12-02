@@ -279,7 +279,7 @@ bool MCHS_Imitator::CLink_TxRx(int numOfDownLink, int opcode, QList<unsigned int
 
 }
 
-bool MCHS_Imitator::CLink_sendOpcode(int numOfDownLink, int opcode)
+void MCHS_Imitator::CLink_sendOpcode(int numOfDownLink, int opcode)
 {
        WORD *Addr;
        WORD *Data;

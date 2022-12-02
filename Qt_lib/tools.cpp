@@ -1158,7 +1158,7 @@ bool ConnectionManager::connectDevice()
             }
             return true;
         }
-    }
+    }else
 /*==========================================================================================*\
 - - - - - - - - - - - - - USB PAGE - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*==========================================================================================*/
@@ -1168,16 +1168,22 @@ bool ConnectionManager::connectDevice()
             NameConnection = ConnectionInfo.USB_SN;
             USB_Device->Select_Device(ConnectionInfo.USB_SN.toStdString().c_str());
             statusConnection = USB_Device->Open_Device();
-            if(!statusConnection)
+            if(!statusConnection){
                 Message = "Connection error!";
+                return false;
+            }
+            return true;
         }
         if(statusConnection == true){
             // - - - Отключение - - - //
             statusConnection = !USB_Device->Close_Device();
-            if(!statusConnection)
+            if(!statusConnection){
                 Message = "Disconnection error!";
+                return false;
+            }
+            return true;
         }
-    }
+    }else
 /*==========================================================================================*\
 - - - - - - - - - - - - - Slow Link PAGE - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*==========================================================================================*/
@@ -1241,7 +1247,21 @@ bool ConnectionManager::write(QList<unsigned int> *Addr, QList<unsigned int> *Da
         }
     }
 
+    if(ConnectionInfo.connectionType == USB){
+        if(Addr->size() == Data->size()){
+            bool status;
 
+
+            status = USB_Write_Data(USB_Device,QListToWord(Addr),Addr->size(), QListToWord(Data));
+            if(!status){
+                Message = "Sending error! : "+QString::number(Eth_Device->LastError);
+                return false;
+            }
+        }else{
+            Message = "Addr->size() != Data->size()";
+            return false;
+        }
+    }
     return true;
 }
 
@@ -1276,6 +1296,22 @@ bool ConnectionManager::read(QList<unsigned int> *Addr, QList<unsigned int> *Dat
             return false;
         }
     }
+
+    if(ConnectionInfo.connectionType == USB){
+        bool status;
+        WORD* addrRead  = new WORD[Addr->size()];
+        unsigned int* InData = new unsigned int[Addr->size()];
+        status = USB_Read_Data(USB_Device,QListToWord(Addr),Addr->size(),InData);
+        for(int i=0;i<Addr->size();i++){
+            Data->append(InData[i]);
+        }
+
+        if(!status){
+            Message = "Receive error! : ";
+            return false;
+        }
+    }
+
 
     return true;
 }
